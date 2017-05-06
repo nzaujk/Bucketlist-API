@@ -33,4 +33,4 @@ class Bucketlist(db.Model):
 
     def __repr__(self):
         """returning a printable version for the object"""
-        return "<Activity: {}>".format(self.title)
+        return "<Bucklist: {}>".format(self.title)

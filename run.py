@@ -1,9 +1,9 @@
 import os
 
-from app import initialize_app
+from app import create_app
 
-config_name = os.getenv('APP_SETTINGS')
-app = initialize_app(config_name)
+config_name = os.getenv('FLASK_CONFIG')
+app = create_app(config_name)
 
 if __name__ == '__main__':
     app.run()
