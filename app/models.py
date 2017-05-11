@@ -10,7 +10,7 @@ class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True)
-    password_hash = db.Column(db.String(128))
+    password = db.Column(db.String(128))
 
     def hash_password(self, password):
         """the function takes a plain password as argument
@@ -23,7 +23,7 @@ class User(db.Model):
         return pwd_context.verify(password, self.password_hash)
 
     def __repr__(self):
-        return '<user_id {}>'.format(self.user_id)
+        return '<username {}>'.format(self.username)
 
 
 class Bucketlist(db.Model):
