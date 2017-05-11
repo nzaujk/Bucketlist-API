@@ -22,7 +22,13 @@ class TestUser(BaseTestCase, TestCase):
         """Test that the required fields are not empty to register"""
         pass
 
+    def test_wrong_credentials_fails(self):
+        """Test cannot login with wrong credentials"""
+        pass
 
+    def test__log_out(self):
+        """Test that a user can logout"""
+        pass
 
 
 

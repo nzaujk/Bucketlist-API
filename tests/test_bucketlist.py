@@ -31,15 +31,24 @@ class Bucketlist(BaseTestCase, TestCase):
         pass
 
     def test_public_cannot_add_bucketlist(self):
-        """Test that POST can only be done by users"""
+        """Test authentication is required to add a bucketlist"""
         pass
 
     def test_must_be_Loggedin_view_bucketlist(self):
-        """Test for private GET"""
+        """Test authentication is required to access bucketlists"""
+        pass
 
     def test_delete_bucketlist(self):
         """Test API can DELETE """
         pass
+
+    def test_duplicate_buckelist_not_allowed(self):
+        """Tests that a user cannot input an existing bucket list"""
+        pass
+
+
+
+
 
 
 
