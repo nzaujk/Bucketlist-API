@@ -10,6 +10,7 @@ class BaseTestCase(TestCase):
 
     def create_app(self):
         app.config.from_object(app_config["testing"])
+        self.client = app.test_client
         return app
 
     def setUp(self):
@@ -23,14 +24,12 @@ class BaseTestCase(TestCase):
     def fetch_token(self):
         """ fetch token for authentication"""
         user = {"username": "user1", "password": "1234"}
-        response = self.client.post('/auth/login', data=json.dumps(user),
-                               content_type='application/json')
-        response_data = json.loads(str(response.get_data))
+        get_token = self.client.post('/auth/login', data=json.dumps(user),
+                                     content_type='application/json')
+        response_data = json.loads(get_token.get_data(as_text=True))
         token = response_data.get("Authorization")
-        return {"Authorization": "token " + token,
-                "Accept": 'application/json',
-                "Content-Type": 'application/json',
-                }
+        return token
+
 
     def tearDown(self):
         db.session.remove()

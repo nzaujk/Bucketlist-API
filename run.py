@@ -1,9 +1,9 @@
-import os
 
-from app import app, create_app
+from instance.config import *
+from app import app
 
-config_name = os.getenv('FLASK_CONFIG')
-app = create_app(config_name)
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
+
 
 if __name__ == '__main__':
     app.run()

@@ -11,11 +11,19 @@ class TestUser(BaseTestCase, TestCase):
         user = {"username": "user1", "password": "1234"}
         response = self.client.post('/auth/login', data=json.dumps(user), content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(str(response.get_data))
+        response_data = json.loads(response.get_data(as_text=True))
         self.assertIn('Authorization', response_data)
 
     def test_user_password_authentication(self):
         """Test that password is valid"""
+        pass
+
+    def test_new_user_not_already_registered(self):
+        """Test a new user cannot exist in the system"""
+        pass
+
+    def test_username_is_valid_character(self):
+        """Test that a username is not a number or invalid character"""
         pass
 
     def test_user_required_fields_to_register(self):
@@ -26,10 +34,9 @@ class TestUser(BaseTestCase, TestCase):
         """Test cannot login with wrong credentials"""
         pass
 
-    def test__log_out(self):
+    def test_log_out(self):
         """Test that a user can logout"""
         pass
-
 
 
 if __name__ == '__main__':
