@@ -1,43 +1,69 @@
 import json
-import unittest
-from flask_testing import TestCase
-
 from tests.base import BaseTestCase
 
 
-class TestUser(BaseTestCase, TestCase):
+class TestUser(BaseTestCase):
+
+    def test_registration(self):
+        """ Test successful user registration """
+        user = {"username": "Joe", "password": "password"}
+        response = self.client.post('api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['message'], 'account created')
+
+    def test_username_exists(self):
+        """Test a username already exists"""
+        user = {"username": "Joe", "password": "password"}
+        response = self.client.post('api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 202)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['message'], 'username exists')
+
+    def test_registration_empty_fields_fails(self):
+        """test empty fields cannot be registered"""
+        user = {"username": "", "password": ""}
+        response = self.client.post('api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['message'], 'cannot send an empty entry')
+
     def test_user_login(self):
         """Test user login POST"""
-        user = {"username": "user1", "password": "1234"}
-        response = self.client.post('/auth/login', data=json.dumps(user), content_type='application/json')
+        user = {"username": "Joe", "password": "password"}
+        response = self.client.post('api/v1/auth/login', data=json.dumps(user),
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn('Authorization', response_data)
+        self.assertIn('token', response_data)
 
     def test_user_password_authentication(self):
         """Test that password is valid"""
         pass
 
-    def test_new_user_not_already_registered(self):
-        """Test a new user cannot exist in the system"""
-        pass
+    def test_cannot_login_empty_username_password(self):
+        """Test that the required fields are not empty to login"""
+        user = {"username": "", "password": ""}
+        response = self.client.post('api/v1/auth/login', data=json.dumps(user),
+                                    content_type='application/json')
 
-    def test_username_is_valid_character(self):
-        """Test that a username is not a number or invalid character"""
-        pass
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['error'],'Username or Password cant be empty', )
 
-    def test_user_required_fields_to_register(self):
-        """Test that the required fields are not empty to register"""
-        pass
-
-    def test_wrong_credentials_fails(self):
+    def test_wrong_login_credentials_fails(self):
         """Test cannot login with wrong credentials"""
-        pass
+        user = {'username': 'Mike', 'password': 'invalid'}
+        response = self.client.post('api/v1/auth/login', data=json.dumps(user),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['error'], 'invalid username or password')
 
-    def test_log_out(self):
-        """Test that a user can logout"""
-        pass
 
 
-if __name__ == '__main__':
-    unittest.main()
