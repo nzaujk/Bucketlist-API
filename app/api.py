@@ -1,9 +1,12 @@
 from flask import g
 from flask_httpauth import HTTPTokenAuth
-from flask_restful import Resource, reqparse, marshal, fields
 
+from flask_restful import Resource, reqparse, marshal, fields
 from app import db
+
 from app.models import User, BucketListItems, Bucketlist
+from app.models import save, delete
+
 
 auth = HTTPTokenAuth(scheme='Token')
 
@@ -12,10 +15,10 @@ auth = HTTPTokenAuth(scheme='Token')
 def verify_token(token):
     # authenticate by token
     user = User.verify_auth_token(token)
-    if not user:
-        return False
-    g.user = user
-    return True
+    if user:
+        g.user = user
+        return True
+    return False
 
 
 class RegisterAPI(Resource):
@@ -28,32 +31,38 @@ class RegisterAPI(Resource):
         """initializing parsers"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('username', type=str, required=True,
-                                   help='username cannot be blank', location='json')
+                                   help='username is blank')
+        self.reqparse.add_argument('email', type=str, required=True,
+                                   help='email is blank')
 
-        self.reqparse.add_argument('password', required=True, help='password cannot be blank',
-                                   location='json')
+        self.reqparse.add_argument('password', required=True, help='password is blank')
         super(RegisterAPI, self).__init__()
 
     def post(self):
         """parsing and validating a request"""
         args = self.reqparse.parse_args()
         username = args['username']
+        email = args['email']
         password = args['password']
+        # check if user already exists
 
-        # check if parameters are null
-        if username == "" or password == "":
-            return {'message': 'cannot send an empty entry'}, 400
+        if username == "":
+            return {'message': 'username cannot be empty'}, 400
+        if password == "":
+            return {'message': 'password cannot be empty'}, 400
+        if email == "":
+            return {'message': 'email cannot be empty'}, 400
 
+        if User.query.filter_by(email=email).first() is not None:
+            return {'message': 'email exists'}, 202
         if User.query.filter_by(username=username).first() is not None:
             #  status code - request accepted but not processed
-
             return {
                 'message': 'username exists'}, 202
 
-        new_user = User(username=username, password=password)
-        new_user.hash_password(password)
-        db.session.add(new_user)
-        db.session.commit()
+        user = User(username='username',email='email', password='password')
+        user.hash_password(password)
+        save(user)
         return {'message': 'account created'}, 201
 
 
@@ -66,6 +75,8 @@ class LoginAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('username', type=str, required=True,
                                    help='username cannot be blank', location='json')
+        self.reqparse.add_argument('username', type=str, required=True,
+                                   help='username cannot be blank', location='json')
         self.reqparse.add_argument('password', required=True,
                                    help='password cannot be blank', location='json')
         super(LoginAPI, self).__init__()
@@ -75,15 +86,14 @@ class LoginAPI(Resource):
         args = self.reqparse.parse_args()
         username = args['username']
         password = args['password']
+        if username and password:
+            user = User.query.filter_by(username=username).first()
+        else:
+            return {"error": "please enter a username and password."}, 400
 
-        if password == "" or username == "":
-            # bad request
-            return {'error': "Username or Password can't be empty"}, 400
-        user = User.query.filter_by(username=username).first()
         if user and user.verify_password(password):
-            token = user.generate_auth_token().decode("utf-8")
-            return {'token': token}, 200
-
+            token = user.generate_auth_token()
+            return {'message': 'login successful', 'token': token.decode('utf-8')}, 200
         # status code - unauthorised
         return {'error': 'invalid username or password'}, 401
 
@@ -105,18 +115,18 @@ bucketlist_fields = {
     'created_by': fields.String
 }
 
-# users_fields = {
-#     'user_id': fields.Integer,
-#     'username': fields.String,
-#     'bucketlists': fields.Nested(bucketlist_fields)
-# }
+user_fields = {
+    'user_id': fields.Integer,
+    'username': fields.String,
+    'bucketlists': fields.Nested(bucketlist_fields)
+}
 
 
 class BucketlistsAPI(Resource):
     """this resource shows all and adds bucketlists."""
-    decorators = [auth.login_required]
+    # decorators = [auth.login_required]
 
-    def post(self, bucketlist_id):
+    def post(self):
         """create a new bucketlist"""
 
         self.reqparse = reqparse.RequestParser()
@@ -128,15 +138,15 @@ class BucketlistsAPI(Resource):
         args = self.reqparse.parse_args()
         title = args['title']
         description = args['description']
-        user_id = g.user.user_id
+
         if title == "":
             # bad request status
             return {'error': "Bucket list title cannot be empty"}, 400
 
-        if Bucketlist.query.filter_by(title=title, created_by=user_id).first() is not None:
-            # accepted status but cannot be created
-            return {'message': 'The bucket list already exists'}, 202
-        bucketlist = Bucketlist(title=title, description=description, created_by=user_id)
+        if Bucketlist.query.filter_by(title=title, created_by=g.user.id).first() is not None:
+
+            return {'message': 'The bucket list already exists'}, 400
+        bucketlist = Bucketlist(title=title, description=description, created_by=g.user.id)
         db.session.add(bucketlist)
         db.session.commit()
         # created
@@ -187,30 +197,30 @@ class BucketlistsAPI(Resource):
 
 
 class BucketlistAPI(Resource):
-    decorators = [auth.login_required]
+    # decorators = [auth.login_required]
 
-    def get(self, bucketlist_id):
+    def get(self, id):
         """ view a single bucket list"""
-        user_id = g.user.user_id
-        bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id,
+        user_id = g.user.id
+        bucketlist = Bucketlist.query.filter_by(id=id,
                                                 created_by=user_id).first()
 
         if bucketlist:
-            # if bucketlist exists :status code ok
+            # bucketlist exists return status code ok
             return marshal(bucketlist, bucketlist_fields), 200
-            # if not return not found
+            # if not, return not found 404
 
         return {'error': "BucketList not found."}, 404
 
-    def put(self, bucketlist_id):
+    def put(self, id):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, location='json')
         self.reqparse.add_argument('description', location='json')
 
-        user_id = g.user.user_id
+        user_id = g.user.id
         args = self.reqparse.parse_args()
         # check if the bucket list exists
-        bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id,
+        bucketlist = Bucketlist.query.filter_by(id=id,
                                                 created_by=user_id).first()
 
         if not bucketlist:
@@ -221,43 +231,52 @@ class BucketlistAPI(Resource):
         if args.description:
             bucketlist.description = args.description
         db.session.commit()
-        return {'message': 'Bucket list updated succcessfully'}
+        return {'message': 'Bucket list updated successfully'}
 
-    def delete(self, bucketlist_id):
+    def delete(self, id):
         user_id = g.user.user_id
-        bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id,
+        bucketlist = Bucketlist.query.filter_by(id=id,
                                                 created_by=user_id).first()
-        # check if bucket exists
+        # check if bucket list exists
         if bucketlist:
-            db.session.delete(bucketlist)
-            db.session.commit()
+            delete(bucketlist)
             return {'message': 'bucket list deleted'}
-        # not found status
+        # if not found  return status 404
         return {'error': "Bucket list not found"}, 404
 
 
 class BucketlistItemsAPI(Resource):
-    decorators = [auth.login_required]
+    # decorators = [auth.login_required]
 
-    def get(self, bucketlist_id):
-        bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
+    def get(self, id):
+        bucketlist = Bucketlist.query.filter_by(id=id).first()
         if not bucketlist:
             return {'error': "Bucket list not found."}, 404
-        bucketlist_items = BucketListItems.query.filter_by(bucketlist_id=bucketlist_id).all()
+        bucketlist_items = BucketListItems.query.filter_by(id=id).all()
         if not bucketlist_items:
             return {'message': "No Items created yet"}
 
-        return {'items': marshal_with(bucketlist_items, bucketlist_items_fields)}
-
-    def delete(self):
-        pass
+        return {'items': marshal(bucketlist_items, bucketlist_items_fields)}
 
 
 class BucketlistItemAPI(Resource):
-    decorators = [auth.login_required]
+    # decorators = [auth.login_required]
 
-    def get(self):
-        pass
+    def get(self, id, item_id):
+        # check if bucketlist exists
+        bucketlist = Bucketlist.query.filter_by(id=id).first()
+        if not bucketlist:
+            # status code - not found
+            return {'error': "bucketlist not found"}, 404
+
+        bucketlist_item = BucketListItems.query.filter_by(id=id, item_id=item_id).first()
+
+        if bucketlist_item:
+            # status code - ok
+            return marshal(bucketlist_item, bucketlist_items_fields), 200
+
+            # else status code - not found
+        return {'error': "BucketListItem with id {} not found.".format(item_id)}, 404
 
     def post(self):
         pass

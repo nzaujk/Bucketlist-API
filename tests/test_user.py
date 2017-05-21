@@ -6,41 +6,68 @@ class TestUser(BaseTestCase):
 
     def test_registration(self):
         """ Test successful user registration """
-        user = {"username": "Joe", "password": "password"}
-        response = self.client.post('api/v1/auth/register', data=json.dumps(user),
+        user = {"username": "rachel","email":"rachel@email.com", "password": "password"}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn(response_data['message'], 'account created')
+        self.assertIn(response_data['message'],'account created', )
 
-    def test_username_exists(self):
-        """Test a username already exists"""
-        user = {"username": "Joe", "password": "password"}
-        response = self.client.post('api/v1/auth/register', data=json.dumps(user),
-                                    content_type='application/json')
-
-        self.assertEqual(response.status_code, 202)
-        response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn(response_data['message'], 'username exists')
-
-    def test_registration_empty_fields_fails(self):
-        """test empty fields cannot be registered"""
-        user = {"username": "", "password": ""}
-        response = self.client.post('api/v1/auth/register', data=json.dumps(user),
+    def test_registration_username_cannot_be_empty(self):
+        """test registration username field cannot empty"""
+        user = {"username": "", 'email': 'emailme@email.com', "password": "password"}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
         response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn(response_data['message'], 'cannot send an empty entry')
+        self.assertIn(response_data['message'], 'username cannot be empty')
+
+    def test_registration_email_cannot_be_empty(self):
+        """test registration email field cannot empty"""
+        user = {"username": "ranchoo", 'email': '', "password": "password"}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['message'], 'email cannot be empty')
+
+    def test_registration_password__cannot_be_empty(self):
+        """test registration password field cannot empty"""
+        user = {"username": "miriam", 'email': 'meme@email.com', "password": ""}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['message'], 'password cannot be empty')
+
+    def test_new_user_cannot_register_with_existing_username(self):
+        """Test a user cannot register with an existing username"""
+        user = {"username": "joenzau",'email': 'joe@email.com', "password": "password"}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+        new_response_data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(response.status_code, 202)
+        self.assertIn(new_response_data['message'], 'username exists')
+
+    def test_new_user_cannot_register_with_existing_email(self):
+        """Test a user cannot register with an existing email address"""
+        user = {"username": "joewaweru",'email': 'myemail@email.com', "password": "password"}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
+                                    content_type='application/json')
+        new_response_data = json.loads(response.get_data(as_text=True))
+        self.assertEqual(response.status_code, 202)
+        self.assertIn(new_response_data['message'], 'email exists')
 
     def test_user_login(self):
         """Test user login POST"""
-        user = {"username": "Joe", "password": "password"}
-        response = self.client.post('api/v1/auth/login', data=json.dumps(user),
-                                    content_type='application/json')
+        user = {'username': 'joenzau', 'password': 'password'}
+        response = self.client.post('/api/v1/auth/login', data=json.dumps(user))
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn('token', response_data)
+        self.assertIn(response_data['message'], 'login successful')
 
     def test_user_password_authentication(self):
         """Test that password is valid"""
@@ -49,17 +76,17 @@ class TestUser(BaseTestCase):
     def test_cannot_login_empty_username_password(self):
         """Test that the required fields are not empty to login"""
         user = {"username": "", "password": ""}
-        response = self.client.post('api/v1/auth/login', data=json.dumps(user),
+        response = self.client.post('/api/v1/auth/login', data=json.dumps(user),
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
         response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn(response_data['error'],'Username or Password cant be empty', )
+        self.assertIn(response_data['error'],'please enter a username and password.')
 
     def test_wrong_login_credentials_fails(self):
         """Test cannot login with wrong credentials"""
-        user = {'username': 'Mike', 'password': 'invalid'}
-        response = self.client.post('api/v1/auth/login', data=json.dumps(user),
+        user = {'username': 'joenzau', 'password': 'invalidpassword'}
+        response = self.client.post('/api/v1/auth/login', data=json.dumps(user),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 401)
         response_data = json.loads(response.get_data(as_text=True))
