@@ -91,7 +91,8 @@ class LoginAPI(Resource):
 
         if user and user.verify_password(password):
             token = user.generate_auth_token()
-            return {'message': 'login successful', 'token': token.decode('utf-8')}, 200
+            print(token)
+            return {'message': 'login successful', 'token' : token.decode('utf-8')}, 200
         # status code - unauthorised
         return {'error': 'invalid username or password'}, 401
 
@@ -241,7 +242,7 @@ class BucketlistItemsAPI(Resource):
     def get(self, bucketlist_id):
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
         if not bucketlist:
-            return {'error': "Bucket list not found."}, 404
+            return {'error': "bucket list not found."}, 404
         bucketlist_items = BucketListItems.query.filter_by(bucketlist_id=bucketlist_id).all()
         if not bucketlist_items:
             return {'message': "no items created yet"}
@@ -283,7 +284,7 @@ class BucketlistItemsAPI(Resource):
 
 
 class BucketlistItemAPI(Resource):
-    # decorators = [auth.login_required]
+    decorators = [auth.login_required]
 
     def get(self, bucketlist_id, item_id):
         # check if bucketlist exists

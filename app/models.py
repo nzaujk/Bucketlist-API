@@ -2,10 +2,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired) # for creating tokens
-
-
 from datetime import datetime
-from app.config import app_config
 from app import db
 
 
@@ -41,10 +38,10 @@ class User(db.Model):
             data = serializer.loads(token)
         except SignatureExpired:
             # When token is valid but expired
-            return None
+            return
         except BadSignature:
             # invalid token
-            return None
+            return
         user = User.query.get(data["user_id"])
         return user
 
@@ -67,6 +64,7 @@ class Bucketlist(db.Model):
                            db.ForeignKey('user.user_id'))
     user = db.relationship('User')
     items = db.relationship('BucketListItems')
+
 
     def __repr__(self):
         """returning a printable version for the object"""
@@ -102,5 +100,3 @@ def delete(record):
 
 def update():
     db.session.commit()
-
-

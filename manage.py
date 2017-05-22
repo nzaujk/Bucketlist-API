@@ -4,11 +4,11 @@ from app.config import BaseConfig
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from app import models
-from app import flask_app, db
+from app import app, db
 
-flask_app.config['SQLALCHEMY_DATABASE_URI'] = BaseConfig.SQLALCHEMY_DATABASE_URI
-migrate = Migrate(flask_app, db)
-manager = Manager(flask_app)
+app.config['SQLALCHEMY_DATABASE_URI'] = BaseConfig.SQLALCHEMY_DATABASE_URI
+migrate = Migrate(app, db)
+manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
