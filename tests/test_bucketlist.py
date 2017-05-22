@@ -9,11 +9,10 @@ class Bucketlist(BaseTestCase):
                            "title": "Go to Ertaale"}
         self.bucket_list_item = {"title": 'Mountain Climbing'}
 
-
     def test_create_bucket_list(self):
         """Test API can POST request"""
 
-        response = self.client.post('/bucketlists/', data=json.dumps(self.bucket_list),
+        response = self.client.post('/bucketlists', data=json.dumps(self.bucket_list),
                                  headers=self.get_header())
         self.assertEqual(response.status_code, 201)
         response_data = json.loads(response.data)
@@ -27,7 +26,7 @@ class Bucketlist(BaseTestCase):
         no_title = {'': 'Visit Lake Turkana',
                     'description':'By end of the year',
                     'created by': 'Joe'}
-        response = self.client.post('/bucketlists/', data=no_title,
+        response = self.client.post('/bucketlists', data=no_title,
                                     headers=self.get_header())
         self.assertEqual(response.status_code, 400)
         self.assertIn("Bucket list title cannot be empty",
@@ -54,7 +53,7 @@ class Bucketlist(BaseTestCase):
 
     def test_unauthenitcated_cannot_add_bucketlist(self):
         """Test authentication is required to add a bucketlist"""
-        response = self.client.post('/api/v1/bucketlists/', data=json.dumps(self.bucket_list))
+        response = self.client.post('/api/v1/bucketlists', data=json.dumps(self.bucket_list))
         self.assertEqual(response.status_code, 401)
 
     # def test_must_be_Loggedin_view_bucketlist(self):
@@ -63,7 +62,7 @@ class Bucketlist(BaseTestCase):
     #
     def test_delete_bucketlist(self):
         """Test API can DELETE """
-        response = self.client.post('/api/v1/bucketlists/',data=json.dumps(self.bucket_list),
+        response = self.client.post('/api/v1/bucketlists',data=json.dumps(self.bucket_list),
                                       headers=self.get_header())
         self.assertEqual(response.status_code, 201)
         response_item = self.client.delete('/bucketlists/1')
@@ -74,7 +73,7 @@ class Bucketlist(BaseTestCase):
 
     def test_delete_item_in_bucketlist(self):
         """Test item is deleted from bicketlist"""
-        response = self.client.post('/api/v1/bucketlists/1/items/',
+        response = self.client.post('/api/v1/bucketlists/1/items',
                                     data=json.dumps(self.bucket_list),
                                     headers=self.get_header())
         self.assertEqual(response.status_code, 201)
@@ -86,14 +85,15 @@ class Bucketlist(BaseTestCase):
 
     def test_cannot_delete_not_exists(self):
         """If a delete attempt is done to a none existing file"""
+
         result = self.client.get('/api/v1/bucketlists/1')
         self.assertEqual(result.status_code, 404)
         response_data = json.loads(result.get_data(as_text=True))
-        self.assertIn("Bucketlist doesn't exist",response_data['error'])
+        self.assertIn("bucketlist doesn't exist",response_data['error'])
 
     def test_lists_all_bucketlist_items(self):
         """Test that a user can view all bucketlists"""
-        response = self.client.get('/api/v1/bucketlists/1/items/', data=json.dumps(self.bucket_list_items_),
+        response = self.client.get('/api/v1/bucketlists/1/items', data=json.dumps(self.bucket_list_items_),
                                    headers=self.get_header())
         self.assertEqual(response.status_code, 200)
 

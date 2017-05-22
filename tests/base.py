@@ -25,13 +25,11 @@ class BaseTestCase(TestCase):
     def get_header(self):
         """ Gets token for user authentication"""
         user = {"username": "joenzau","password": "password"}
-        response = self.client.post('/api/v1/auth/login',
-                    data=json.dumps(user), content_type='application/json')
+        response = self.client.post('/api/v1/auth/login',data=json.dumps(user),
+                                    content_type='application/json')
         response_data = json.loads(response.get_data(as_text=True))
         token = response_data.get('Authorization')
-        return {"Authorization": "token " + token,
-                "Accept": 'application/json',
-                "Content-Type": 'application/json',
+        return {"Authorization": "token " + token
                 }
 
     def tearDown(self):

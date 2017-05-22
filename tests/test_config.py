@@ -20,13 +20,13 @@ class TestDevelopmentConfig(TestCase):
 
 class TestTestingConfig(TestCase):
     def create_app(self):
-        flask_app.config.from_object('app.config.TestingConfig')
+        flask_app.config.from_object(app_config['testing'])
         return flask_app
 
     def test_app_is_testing(self):
         self.assertTrue(flask_app.config['DEBUG'])
         self.assertTrue(
             flask_app.config['SQLALCHEMY_DATABASE_URI']
-            == "postgresql://postgres:root@localhost/test_bucketlist_db")
+            == "postgresql://localhost/test_bucketlist_db")
         self.assertTrue(flask_app.config['SECRET_KEY'] == os.getenv('SECRET_KEY'))
 

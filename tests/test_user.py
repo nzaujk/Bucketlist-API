@@ -1,5 +1,6 @@
 import json
 from tests.base import BaseTestCase
+from app.models import User
 
 
 class TestUser(BaseTestCase):
@@ -62,16 +63,13 @@ class TestUser(BaseTestCase):
         self.assertIn(new_response_data['message'], 'email exists')
 
     def test_user_login(self):
-        """Test user login POST"""
-        user = {'username': 'joenzau', 'password': 'password'}
-        response = self.client.post('/api/v1/auth/login', data=json.dumps(user))
+        """Test user can login"""
+        user = {'username': 'joenzau','password': 'password'}
+        response = self.client.post('/api/v1/auth/login', data=user)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.get_data(as_text=True))
-        self.assertIn(response_data['message'], 'login successful')
-
-    def test_user_password_authentication(self):
-        """Test that password is valid"""
-        pass
+        print(response_data)
+        self.assertIn('login successful', str(response_data['message']))
 
     def test_cannot_login_empty_username_password(self):
         """Test that the required fields are not empty to login"""
