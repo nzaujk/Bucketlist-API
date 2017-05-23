@@ -62,9 +62,8 @@ class Bucketlist(db.Model):
                               onupdate=datetime.now)
     created_by = db.Column(db.Integer,
                            db.ForeignKey('user.user_id'))
-    user = db.relationship('User')
+    user = db.relationship('User', backref=db.backref("user", lazy="dynamic"))
     items = db.relationship('BucketListItems', backref='bucketlist')
-
 
     def __repr__(self):
         """returning a printable version for the object"""
@@ -77,12 +76,13 @@ class BucketListItems(db.Model):
     item_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     item_name = db.Column(db.String(255))
     date_created = db.Column(db.DateTime, default=datetime.now)
-    date_modified = db.Column(db.DateTime, onupdate=datetime.now)
+    date_modified = db.Column(db.DateTime, onupdate=datetime.now,
+                              default=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-    user = db.relationship('User')
+    user = db.relationship('User', backref=db.backref("bucketlistitems", lazy="dynamic"))
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.bucketlist_id',
                                                         ondelete='CASCADE'))
-    is_done = db.Column(db.Boolean, default=False)
+    is_done = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return '<Bucketlist Item {}>'.format(self.title)

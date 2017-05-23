@@ -12,5 +12,18 @@ manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
 
+@manager.command
+def createdb(dbname):
+    os.system('createdb ' + dbname)
+    print("{} created".format(dbname))
+
+
+@manager.command
+def dropdb(dbname):
+    os.system('dropdb '+ dbname)
+
+    print("{} deleted".format(dbname))
+
+
 if __name__ == '__main__':
     manager.run()

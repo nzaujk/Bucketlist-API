@@ -55,7 +55,7 @@ class RegisterAPI(Resource):
 
         if User.query.filter(User.email.ilike(email)).first():
             return {'message': 'email exists'}, 202
-        if User.query.filter_by(username=username).first() is not None:
+        if User.query.filter(User.username.ilike(username)).first() is not None:
             #  status code - request accepted but not processed
             return {
                 'message': 'username exists'}, 202
@@ -186,8 +186,8 @@ class BucketlistsAPI(Resource):
 
         response = {'bucketlists': marshal(bucketlists, bucketlist_fields),
                     'pages': total,
-                    'url': "http://address/api/v1.0/bucketlists/?page=",
-                    'search': "http://address/api/v1.0/bucketlists/?q="
+                    'url': "http://127.0.0.1:5000/api/v1/bucketlists?limit=20",
+                    'search': "http://127.0.0.1:5000/api/v1/bucketlists?q="
                     }
         return response
 
@@ -236,6 +236,7 @@ class BucketlistAPI(Resource):
 
 
 class BucketlistItemsAPI(Resource):
+    decorators = [auth.login_required]
 
     def get(self, bucketlist_id):
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
@@ -271,8 +272,7 @@ class BucketlistItemsAPI(Resource):
         if BucketListItems.query.filter_by(item_name=item_name,
                                            bucketlist_id=bucketlist_id).first() is not None:
 
-            return {'error': 'item already exists in the bucketlist'(
-                bucketlist_id, item_name)}, 400
+            return {'error': 'item already exists in the bucketlist'}, 400
 
         bucketlist_item = BucketListItems(
             item_name=item_name, bucketlist_id=bucketlist_id, is_done=is_done)
@@ -282,6 +282,7 @@ class BucketlistItemsAPI(Resource):
 
 
 class BucketlistItemAPI(Resource):
+    decorators = [auth.login_required]
 
     def get(self, bucketlist_id=None, item_id=None):
         # check if bucketlist exists
@@ -302,8 +303,8 @@ class BucketlistItemAPI(Resource):
         """ Update bucketlist item"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('item_name', type=str, required=True,
-                                   help="name cannot be blank", location='json')
-        self.reqparse.add_argument('is_done', type=bool, location='json')
+                                   help="name cannot be blank")
+        self.reqparse.add_argument('is_done', type=bool)
         args = self.reqparse.parse_args()
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
         if not bucketlist:
@@ -339,7 +340,7 @@ class BucketlistItemAPI(Resource):
         if not bucketlist_item:
             return {'error': "item not found."}, 404
 
-        save(bucketlist_item)
+        delete(bucketlist_item)
         return {'message': 'item deleted'}, 200
 
 

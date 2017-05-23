@@ -17,8 +17,6 @@ class BucketlistItems(BaseTestCase):
                                          headers=self.get_header())
         self.assertEqual(item_response.status_code, 201)
 
-        # response_data = item_response.get_data(as_text=True)
-        # self.assertIn('item has been added successfully to bucketlist', response_data['message'])
 
     def test_delete_item_in_bucketlist(self):
         """Test item is deleted from bicketlist"""
@@ -27,9 +25,11 @@ class BucketlistItems(BaseTestCase):
         self.client.post('/api/v1/bucketlists', data=data, headers=self.get_header())
         # add item
         item = {'item_name': 'Mount Kenya hike', 'is_done': False}
-        self.client.post('api/v1/bucketlists/1/items', data=item)
+        self.client.post('api/v1/bucketlists/1/items', data=item,
+                         headers=self.get_header())
         # delete item
-        response_item = self.client.delete('/api/v1/bucketlists/1/items/1')
+        response_item = self.client.delete('/api/v1/bucketlists/1/items/1',
+                                           headers=self.get_header())
         self.assertEqual(response_item.status_code, 200)
 
     def test_lists_all_bucketlist_items(self):
@@ -41,8 +41,10 @@ class BucketlistItems(BaseTestCase):
         # add items to bucket list
         items = {'item_name': 'Mount Kenya Hike', 'is_done': False}
                  # 'item_name': 'Semen Mountains', 'is_done': False}
-        self.client.post('/api/v1/bucketlists/1/items', data=items)
-        view_all = self.client.get('/api/v1/bucketlists/1/items/1', data=data)
+        self.client.post('/api/v1/bucketlists/1/items', data=items,
+                         headers=self.get_header())
+        view_all = self.client.get('/api/v1/bucketlists/1/items/1', data=data,
+                                   headers=self.get_header())
         self.assertEqual(view_all.status_code, 200)
 
     def test_view_single_bucketlist_item(self):
@@ -53,9 +55,11 @@ class BucketlistItems(BaseTestCase):
                          headers=self.get_header())
         # add item
         data = {'item_name': 'Addis Road trip', 'is_done': False}
-        self.client.post('/api/v1/bucketlists/1/items', data=data)
+        self.client.post('/api/v1/bucketlists/1/items', data=data,
+                         headers=self.get_header())
 
-        response = self.client.get('/api/v1/bucketlists/1/items', data=data)
+        response = self.client.get('/api/v1/bucketlists/1/items', data=data,
+                                   headers=self.get_header())
         self.assertEqual(response.status_code, 200)
 
     def test_cannot_view_empty_items(self):
@@ -65,7 +69,7 @@ class BucketlistItems(BaseTestCase):
         self.client.post('/api/v1/bucketlists', data=data,
                          headers=self.get_header())
         # view item in empty bucket list
-        response = self.client.get('/api/v1/bucketlists/1/items')
+        response = self.client.get('/api/v1/bucketlists/1/items',headers=self.get_header())
         # status code 202 accepted but not processed
         self.assertEqual(response.status_code, 202)
 
@@ -77,7 +81,7 @@ class BucketlistItems(BaseTestCase):
                          headers=self.get_header())
         # add items
         add_items = {'item_name': '', 'is_done': False}
-        response = self.client.post('/api/v1/bucketlists/<int:bucketlist_id>/items', data=add_items,
+        response = self.client.post('/api/v1/bucketlists/1/items', data=add_items,
                          headers=self.get_header())
         self.assertEqual(response.status_code, 400)
         response_data = json.loads(response.get_data(as_text=True))
@@ -99,8 +103,12 @@ class BucketlistItems(BaseTestCase):
                          headers=self.get_header())
         # add items
         add_items = {'item_name': 'Bale Mountains', 'is_done': True}
-        response = self.client.post('/api/v1/bucketlists/1/items', data=add_items,
+        first_response = self.client.post('/api/v1/bucketlists/1/items', data=add_items,
                          headers=self.get_header())
+        self.assertEqual(first_response.status_code, 201)
+
+        response = self.client.post('/api/v1/bucketlists/1/items', data=add_items,
+                                    headers=self.get_header())
         self.assertEqual(response.status_code, 400)
 
 
