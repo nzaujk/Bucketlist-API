@@ -17,7 +17,7 @@ class BaseConfig(object):
 
 class DevelopmentConfig(BaseConfig):
     """Configurations for Development."""
-    DEBUG = False
+    DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -12,13 +12,13 @@ class User(db.Model):
     __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(128), unique=True)
-    password_hash = db.Column(db.String(128))
     email = db.Column(db.String(254), unique=True)
+    password_hash = db.Column(db.String(128))
 
     def __init__(self, username, password, email):
         self.username = username
-        self.hash_password(password)
         self.email = email
+        self.hash_password(password)
 
     def hash_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -26,7 +26,7 @@ class User(db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash,password)
 
-    def generate_auth_token(self, expiration=3600):
+    def generate_auth_token(self, expiration=9999999):
         serializer = Serializer(os.getenv('SECRET_KEY'), expires_in=expiration)
         token = serializer.dumps({"user_id": self.user_id})
         return token
@@ -63,7 +63,7 @@ class Bucketlist(db.Model):
     created_by = db.Column(db.Integer,
                            db.ForeignKey('user.user_id'))
     user = db.relationship('User')
-    items = db.relationship('BucketListItems')
+    items = db.relationship('BucketListItems', backref='bucketlist')
 
 
     def __repr__(self):
@@ -75,7 +75,7 @@ class BucketListItems(db.Model):
     """ Models for Items"""
     __tablename__ = 'bucketlistitems'
     item_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(255))
+    item_name = db.Column(db.String(255))
     date_created = db.Column(db.DateTime, default=datetime.now)
     date_modified = db.Column(db.DateTime, onupdate=datetime.now)
     created_by = db.Column(db.Integer, db.ForeignKey('user.user_id'))

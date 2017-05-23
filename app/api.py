@@ -53,14 +53,14 @@ class RegisterAPI(Resource):
         if email == "":
             return {'message': 'email cannot be empty'}, 400
 
-        if User.query.filter_by(email=email).first() is not None:
+        if User.query.filter(User.email.ilike(email)).first():
             return {'message': 'email exists'}, 202
         if User.query.filter_by(username=username).first() is not None:
             #  status code - request accepted but not processed
             return {
                 'message': 'username exists'}, 202
 
-        user = User(username='username',email='email', password='password')
+        user = User(username=username,email=email, password=password)
         user.hash_password(password)
         save(user)
         return {'message': 'account created'}, 201
@@ -110,7 +110,7 @@ bucketlist_fields = {
     'date_created': fields.String,
     'date_modified': fields.String,
     'bucketlist_items': fields.Nested(bucketlist_items_fields),
-    'created_by': fields.String
+    'created_by': fields.Integer
 }
 
 user_fields = {
@@ -251,8 +251,8 @@ class BucketlistItemsAPI(Resource):
         """ add new bucketlist item"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('item_name', type=str, required=True,
-                                   help="item name cannot be blank", location='json')
-        self.reqparse.add_argument('is_done', type=bool, location='json')
+                                   help="item name cannot be blank")
+        self.reqparse.add_argument('is_done', type=bool)
 
         args = self.reqparse.parse_args()
         item_name = args['item_name']

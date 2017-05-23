@@ -18,15 +18,14 @@ class BaseTestCase(TestCase):
         with self.client:
             # create all tables
             db.create_all()
-        new_user = User(username='joenzau', email='myemail@email.com', password='password')
-        save(new_user)
+            new_user = User(username='joenzau', email='myemail@email.com', password='password')
+            save(new_user)
 
         # create and add a test user
 
     def get_header(self):
         """ Gets token for user authentication"""
-        # new_user = User(username='jojo', email='jojo@email.com', password='password')
-        # save(new_user)
+
         user = {"username": "joenzau", "password": "password"}
         response = self.client.post('/api/v1/auth/login',data=json.dumps(user),
                                     content_type='application/json')
