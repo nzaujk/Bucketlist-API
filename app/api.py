@@ -91,7 +91,6 @@ class LoginAPI(Resource):
 
         if user and user.verify_password(password):
             token = user.generate_auth_token()
-            print(token)
             return {'message': 'login successful', 'token' : token.decode('utf-8')}, 200
         # status code - unauthorised
         return {'error': 'invalid username or password'}, 401
@@ -144,7 +143,7 @@ class BucketlistsAPI(Resource):
 
         if Bucketlist.query.filter_by(title=title, created_by=g.user.user_id).first() is not None:
 
-            return {'message': 'The bucket list already exists'}, 400
+            return {'message': 'the bucket list already exists'}, 400
         bucketlist = Bucketlist(title=title, description=description, created_by=g.user.user_id)
         save(bucketlist)
         # created
@@ -237,7 +236,6 @@ class BucketlistAPI(Resource):
 
 
 class BucketlistItemsAPI(Resource):
-    decorators = [auth.login_required]
 
     def get(self, bucketlist_id):
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
@@ -245,7 +243,7 @@ class BucketlistItemsAPI(Resource):
             return {'error': "bucket list not found."}, 404
         bucketlist_items = BucketListItems.query.filter_by(bucketlist_id=bucketlist_id).all()
         if not bucketlist_items:
-            return {'message': "no items created yet"}
+            return {'message': 'no items created yet'}, 202
 
         return {'items': marshal(bucketlist_items, bucketlist_items_fields)}
 
@@ -263,11 +261,11 @@ class BucketlistItemsAPI(Resource):
         # check if title is null
         if item_name == "":
             # status code - Bad request
-            return {'error': "item name cannot be empty."}, 400
+            return {'error': "item name cannot be empty"}, 400
 
         if Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first() is None:
             # status code - Not found
-            return {'error': 'bucketList id not found'}, 404
+            return {'error': 'bucket list  not found'}, 404
 
         # check if item name exists in bucketlist
         if BucketListItems.query.filter_by(item_name=item_name,
@@ -284,9 +282,8 @@ class BucketlistItemsAPI(Resource):
 
 
 class BucketlistItemAPI(Resource):
-    decorators = [auth.login_required]
 
-    def get(self, bucketlist_id, item_id):
+    def get(self, bucketlist_id=None, item_id=None):
         # check if bucketlist exists
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
         if not bucketlist:
@@ -301,7 +298,7 @@ class BucketlistItemAPI(Resource):
             # else status code - not found
         return {'error': 'bucket list item not found.'}, 404
 
-    def put(self, bucketlist_id, item_id):
+    def put(self, bucketlist_id=None, item_id=None):
         """ Update bucketlist item"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('item_name', type=str, required=True,
@@ -328,7 +325,7 @@ class BucketlistItemAPI(Resource):
 
         return {'message': 'item  updated.'}, 200
 
-    def delete(self, bucketlist_id, item_id):
+    def delete(self, bucketlist_id=None, item_id=None):
         """ Delete bucket list item"""
         # check if bucketlist exists
         bucketlist = Bucketlist.query.filter_by(
