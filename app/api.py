@@ -1,4 +1,4 @@
-from flask import g
+from flask import g, request
 from flask_httpauth import HTTPTokenAuth
 
 from flask_restful import Resource, reqparse, marshal, fields
@@ -180,12 +180,28 @@ class BucketlistsAPI(Resource):
 
         bucketlists = Bucketlist.query.filter_by(created_by=g.user.user_id).paginate(
             page=page,per_page=limit,error_out=False)
-
         total = bucketlists.pages
+        has_next = bucketlists.has_next
+        has_previous = bucketlists.has_prev
+        if has_next:
+            next_page = str(request.url_root) + "api/v1/bucketlists?" + \
+                        "limit=" + str(limit) + "&page=" + str(page + 1)
+        else:
+            next_page = "None"
+        if has_previous:
+            previous_page = request.url_root + "api/v1/bucketlists?" + \
+                            "limit=" + str(limit) + "&page=" + str(page - 1)
+        else:
+            previous_page = "None"
+
         bucketlists = bucketlists.items
 
         response = {'bucketlists': marshal(bucketlists, bucketlist_fields),
                     'pages': total,
+                    "has_next": has_next,
+                    "total": total,
+                    "previous_page": previous_page,
+                    "next_page": next_page,
                     'url': "http://127.0.0.1:5000/api/v1/bucketlists?limit=20",
                     'search': "http://127.0.0.1:5000/api/v1/bucketlists?q="
                     }
