@@ -66,7 +66,7 @@ class Bucketlist(db.Model):
     items = db.relationship('BucketListItems', backref='bucketlist')
 
     def __repr__(self):
-        """returning a printable version for the object"""
+        """returning a printable representation for Bucketlist"""
         return "<Bucketlist: {}>".format(self.title)
 
 
@@ -85,6 +85,7 @@ class BucketListItems(db.Model):
     is_done = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
+        """return printable representation for bucketlist item"""
         return '<Bucketlist Item {}>'.format(self.title)
 
 

@@ -46,13 +46,14 @@ class RegisterAPI(Resource):
         password = args['password']
         # check if user already exists
 
-        if username == "":
+        if username == "": # if user does not enter a user name
             return {'message': 'username cannot be empty'}, 400
         if password == "":
             return {'message': 'password cannot be empty'}, 400
         if email == "":
             return {'message': 'email cannot be empty'}, 400
 
+        # Allow matching of strings  with ilike to enable string to be case insensitive
         if User.query.filter(User.email.ilike(email)).first():
             return {'message': 'email exists'}, 202
         if User.query.filter(User.username.ilike(username)).first() is not None:
@@ -91,7 +92,7 @@ class LoginAPI(Resource):
 
         if user and user.verify_password(password):
             token = user.generate_auth_token()
-            return {'message': 'login successful', 'token' : token.decode('utf-8')}, 200
+            return {'message': 'login successful', 'token': token.decode('utf-8')}, 200
         # status code - unauthorised
         return {'error': 'invalid username or password'}, 401
 
@@ -121,12 +122,12 @@ user_fields = {
 
 
 class BucketlistsAPI(Resource):
-    """this resource shows all and adds bucketlists."""
+    """ Create Bucket list URL: /api/v1/bucketlist
+        Request method: POST, GET """
     decorators = [auth.login_required]
 
     def post(self):
-        """create a new bucketlist"""
-
+        """create bucket lists"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, required=True,
                                    help="Bucket list title cannot be empty")
@@ -138,7 +139,7 @@ class BucketlistsAPI(Resource):
         description = args['description']
 
         if title == "":
-            # bad request status
+            # if empty bad request status
             return {'error': "Bucket list title cannot be empty"}, 400
 
         if Bucketlist.query.filter_by(title=title, created_by=g.user.user_id).first() is not None:
@@ -146,11 +147,10 @@ class BucketlistsAPI(Resource):
             return {'message': 'the bucket list already exists'}, 400
         bucketlist = Bucketlist(title=title, description=description, created_by=g.user.user_id)
         save(bucketlist)
-        # created
         return {'message': 'bucketlist created successfuly'}, 201
 
     def get(self):
-        """ View all bucketlists"""
+        """ view all bucket lists """
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('page', location="args", type=int, required=False, default=1)
         self.reqparse.add_argument('limit', location="args", type=int, required=False, default=20)
@@ -209,9 +209,13 @@ class BucketlistsAPI(Resource):
 
 
 class BucketlistAPI(Resource):
+
+    """ Single bucketlist list URL: /api/v1/bucketlist/<int: bucketlist_id>
+            Request method: PUT, GET, DELETE """
     decorators = [auth.login_required]
 
     def get(self, bucketlist_id):
+
         """ view a single bucket list"""
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id,
                                                 created_by=g.user.user_id).first()
@@ -222,6 +226,7 @@ class BucketlistAPI(Resource):
         return {'error': "BucketList not found."}, 404
 
     def put(self, bucketlist_id):
+        """ update bucket list"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, location='json')
         self.reqparse.add_argument('description', location='json')
@@ -242,6 +247,7 @@ class BucketlistAPI(Resource):
         return {'message': 'Bucket list updated successfully'}
 
     def delete(self, bucketlist_id):
+        """ delete bucket list """
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id,
                                                 created_by=g.user.user_id).first()
         if bucketlist:
@@ -252,9 +258,12 @@ class BucketlistAPI(Resource):
 
 
 class BucketlistItemsAPI(Resource):
+    """ Single bucketlist list URL: /api/v1/bucketlist/<int: bucketlist_id>/items
+                Request method: POST GET"""
     decorators = [auth.login_required]
 
     def get(self, bucketlist_id):
+        """view items"""
         bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
         if not bucketlist:
             return {'error': "bucket list not found."}, 404
@@ -340,13 +349,12 @@ class BucketlistItemAPI(Resource):
             bucketlistitem.is_done = args.is_done
         db.session.commit()
 
-        return {'message': 'item  updated.'}, 200
+        return {'message': 'item  updated'}, 200
 
     def delete(self, bucketlist_id=None, item_id=None):
         """ Delete bucket list item"""
         # check if bucketlist exists
-        bucketlist = Bucketlist.query.filter_by(
-            bucketlist_id=bucketlist_id).first()
+        bucketlist = Bucketlist.query.filter_by(bucketlist_id=bucketlist_id).first()
         if not bucketlist:
             return {'error': "bucketList  not found."}, 404
 

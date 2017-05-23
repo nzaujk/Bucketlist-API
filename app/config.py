@@ -33,20 +33,14 @@ class TestingConfig(BaseConfig):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
 
-class StagingConfig(BaseConfig):
-    """Configurations for Staging."""
-    DEBUG = True
-
-
 class ProductionConfig(BaseConfig):
     """Configurations for Production."""
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = "postgresql:///default"
+    SQLALCHEMY_DATABASE_URI = "postgresql://localhost/default"
 
 
 app_config = {
-    'staging': StagingConfig,
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,

@@ -17,7 +17,6 @@ class BucketlistItems(BaseTestCase):
                                          headers=self.get_header())
         self.assertEqual(item_response.status_code, 201)
 
-
     def test_delete_item_in_bucketlist(self):
         """Test item is deleted from bicketlist"""
         # add bucket list
