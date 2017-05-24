@@ -1,0 +1,66 @@
+
+# Bucketlist API
+
+## Description
+#### This is an API for an online bucket list.
+
+
+
+# Requirements
+```
+Python 3.6
+postgresql9.6
+```
+
+# Installation
+
+### 1) Clone the repo from GitHub:
+
+```
+https://github.com/nzaujk/Bucketlist-API.git```
+
+
+### 2) cd to the root of the api
+```
+cd cp1
+```
+
+### 3) Create a virtual environment and install the necessary packages with:
+```
+$ pip install -r requirements.txt
+```
+# Launching the program
+```
+```#### 1. Create a database name
+```
+
+$ python manage.py createdb [dbname]
+```#### 2. Enter the DATABASE URI at the config.py file
+```
+SQLALCHEMY_DATABASE_URI = "postgresql://localhost/bucketlist_db"
+```#### 3. Make migrations
+```
+$ python manage.py db init
+$ python manage.py db migrate
+$ python manage.py db upgrade
+```
+#### 4. Runserver and add the endpoints to postman
+```
+$ python manage.py runserver
+```
+## Endpoints
+```
+```#### http://address/api/v1/auth/login
+http://address/api/v1/auth/register
+http://address/api/v1/bucketlists
+http://address/api/v1/bucketlists/<int: bucketlist_id>
+http://address/api/v1/bucketlists/<int: bucketlist_id>/items
+http://address/api/v1/bucketlists/<int: bucketlist_id>/items/<int: item_id>
+
+# Running the tests
+```
+nosetests
+```
+
+
+```
