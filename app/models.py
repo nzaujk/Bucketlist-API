@@ -82,7 +82,7 @@ class BucketListItems(db.Model):
     user = db.relationship('User', backref=db.backref("bucketlistitems", lazy="dynamic"))
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.bucketlist_id',
                                                         ondelete='CASCADE'))
-    is_done = db.Column(db.Boolean, nullable=False, default=False)
+    is_done = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
         """return printable representation for bucketlist item"""

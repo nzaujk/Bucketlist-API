@@ -86,7 +86,7 @@ class LoginAPI(Resource):
         username = args['username']
         password = args['password']
         if username and password:
-            user = User.query.filter(username=username).first()
+            user = User.query.filter(User.username.ilike(username)).first()
         else:
             return {"error": "please enter a username and password."}, 400
 
@@ -114,12 +114,6 @@ bucketlist_fields = {
     'created_by': fields.Integer
 }
 
-user_fields = {
-    'user_id': fields.Integer,
-    'username': fields.String,
-    'bucketlists': fields.Nested(bucketlist_fields)
-}
-
 
 class BucketlistsAPI(Resource):
     """ Create Bucket list URL: /api/v1/bucketlist
@@ -141,8 +135,8 @@ class BucketlistsAPI(Resource):
         if title == "":
             # if empty bad request status
             return {'error': "Bucket list title cannot be empty"}, 400
-
-        if Bucketlist.query.filter_by(title=title, created_by=g.user.user_id).first() is not None:
+        if Bucketlist.query.filter(Bucketlist.title.ilike(title)).first() and\
+                        Bucketlist.query.filter_by(created_by=g.user.user_id).first() is not None:
 
             return {'message': 'the bucket list already exists'}, 400
         bucketlist = Bucketlist(title=title, description=description, created_by=g.user.user_id)
@@ -166,13 +160,16 @@ class BucketlistsAPI(Resource):
 
         if search:
             bucketlists = Bucketlist.query.filter(Bucketlist.created_by == g.user.user_id,
-                            Bucketlist.title.like('%' + search + '%')).paginate(page=page,
+                            Bucketlist.title.contains(search)).paginate(page=page,
                             per_page=limit, error_out=False)
+
             if bucketlists:
                 total = bucketlists.pages
                 bucketlists = bucketlists.items
+
                 response = {'bucketlists': marshal(bucketlists, bucketlist_fields),
                             'pages': total}
+                print(response)
                 return response
             else:
                 # not found status
@@ -278,7 +275,7 @@ class BucketlistItemsAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('item_name', type=str, required=True,
                                    help="item name cannot be blank")
-        self.reqparse.add_argument('is_done', type=bool)
+        self.reqparse.add_argument('is_done',default=False, type=bool)
 
         args = self.reqparse.parse_args()
         item_name = args['item_name']
@@ -366,7 +363,5 @@ class BucketlistItemAPI(Resource):
 
         delete(bucketlist_item)
         return {'message': 'item deleted'}, 200
-
-
 
 
