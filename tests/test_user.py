@@ -68,7 +68,6 @@ class TestUser(BaseTestCase):
         response = self.client.post('/api/v1/auth/login', data=user)
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.get_data(as_text=True))
-        print(response_data)
         self.assertIn('login successful', str(response_data['message']))
 
     def test_cannot_login_empty_username_password(self):
