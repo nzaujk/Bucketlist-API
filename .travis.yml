@@ -7,6 +7,9 @@ install:
   - pip install -r requirements.txt
   - pip install coveralls
 
+before_script:
+  - psql -c 'create database test_bucketlist_db;' -U postgres
+
 script:
   - nosetests --with-coverage
 
