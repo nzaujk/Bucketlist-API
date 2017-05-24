@@ -86,7 +86,7 @@ class LoginAPI(Resource):
         username = args['username']
         password = args['password']
         if username and password:
-            user = User.query.filter_by(username=username).first()
+            user = User.query.filter(username=username).first()
         else:
             return {"error": "please enter a username and password."}, 400
 

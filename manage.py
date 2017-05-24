@@ -21,7 +21,6 @@ def createdb(dbname):
 @manager.command
 def dropdb(dbname):
     os.system('dropdb '+ dbname)
-
     print("{} deleted".format(dbname))
 
 
