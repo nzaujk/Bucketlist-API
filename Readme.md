@@ -52,7 +52,7 @@ $ python manage.py db upgrade
 $ python manage.py runserver
 ```
 ### Endpoints
-'''http://address/api/v1/auth/login```
+```http://address/api/v1/auth/login```
 ```http://address/api/v1/auth/register```
 ```http://address/api/v1/bucketlists```
 ```http://address/api/v1/bucketlists/<int: bucketlist_id>```
