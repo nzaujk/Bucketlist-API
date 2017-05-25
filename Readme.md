@@ -1,5 +1,7 @@
 # Bucketlist API
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ffb700083f7c4eaa87879def9fb2b6b9)](https://www.codacy.com/app/nzaujk/Bucketlist-API?utm_source=github.com&utm_medium=referral&utm_content=nzaujk/Bucketlist-API&utm_campaign=badger)
+
 ## Description
 #### This is an API for an online bucket list.
 
