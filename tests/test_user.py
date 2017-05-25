@@ -1,6 +1,5 @@
 import json
 from tests.base import BaseTestCase
-from app.models import User
 
 
 class TestUser(BaseTestCase):
@@ -44,13 +43,24 @@ class TestUser(BaseTestCase):
         response_data = json.loads(response.get_data(as_text=True))
         self.assertIn(response_data['message'], 'password cannot be empty')
 
+    def test_invalid_email_format_fails(self):
+        """test that registration with an invalid email format fails"""
+        user = {"username": "sheme", 'email': 'meme@emw.', "password": 'password'}
+        response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
+                                        content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.get_data(as_text=True))
+        self.assertIn(response_data['error'], 'invalid email format')
+
+
     def test_new_user_cannot_register_with_existing_username(self):
         """Test a user cannot register with an existing username"""
         user = {"username": "joenzau",'email': 'joe@email.com', "password": "password"}
         response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
                                     content_type='application/json')
         new_response_data = json.loads(response.get_data(as_text=True))
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 409)
         self.assertIn(new_response_data['message'], 'username exists')
 
     def test_new_user_cannot_register_with_existing_email(self):
@@ -59,7 +69,7 @@ class TestUser(BaseTestCase):
         response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
                                     content_type='application/json')
         new_response_data = json.loads(response.get_data(as_text=True))
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 409)
         self.assertIn(new_response_data['message'], 'email exists')
 
     def test_user_login(self):

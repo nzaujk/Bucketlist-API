@@ -63,10 +63,10 @@ class Bucketlist(db.Model):
                               onupdate=datetime.now)
     created_by = db.Column(db.Integer,
                            db.ForeignKey('user.user_id'))
-    user = db.relationship('User', backref=db.backref("user", lazy="dynamic"))
+    user = db.relationship('User', backref="user")
     items = db.relationship('BucketListItems', backref='bucketlist')
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         """returning a printable representation for Bucketlist"""
         return "<Bucketlist: {}>".format(self.title)
 
@@ -74,18 +74,18 @@ class Bucketlist(db.Model):
 class BucketListItems(db.Model):
     """ Models for Items"""
     __tablename__ = 'bucketlistitems'
-    item_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    item_id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=False)
     item_name = db.Column(db.String(255))
     date_created = db.Column(db.DateTime, default=datetime.now)
     date_modified = db.Column(db.DateTime, onupdate=datetime.now,
                               default=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-    user = db.relationship('User', backref=db.backref("bucketlistitems", lazy="dynamic"))
+    user = db.relationship('User', backref="bucketlistitems")
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlist.bucketlist_id',
                                                         ondelete='CASCADE'))
     is_done = db.Column(db.Boolean, default=False, nullable=False)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         """return printable representation for bucketlist item"""
         return '<Bucketlist Item {}>'.format(self.title)
 
