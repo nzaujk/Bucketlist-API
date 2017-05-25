@@ -1,5 +1,6 @@
 from flask import g, request
 from flask_httpauth import HTTPTokenAuth
+import re
 from flask_restful import Resource, reqparse, marshal, fields
 from app import db
 
@@ -45,14 +46,16 @@ class RegisterAPI(Resource):
         password = args['password']
         # check if user already exists
 
-
+        validate_email = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$',
+                                  email)
         if username == "": # if user does not enter a user name
             return {'message': 'username cannot be empty'}, 400
         if password == "":
             return {'message': 'password cannot be empty'}, 400
         if email == "":
             return {'message': 'email cannot be empty'}, 400
-
+        if not validate_email:
+            return {'error': "invalid email format"}, 400
 
         # Allow matching of strings  with ilike to enable string to be case insensitive
         if User.query.filter(User.email.ilike(email)).first():
@@ -136,10 +139,13 @@ class BucketlistsAPI(Resource):
         if title == "":
             # if empty bad request status
             return {'error': "Bucket list title cannot be empty"}, 400
-        if Bucketlist.query.filter(Bucketlist.title.ilike(title)).first() and\
-                        Bucketlist.query.filter_by(created_by=g.user.user_id).first() is not None:
-
+        # if Bucketlist.query.filter_by(title=title,
+        #                               created_by=g.user.user_id).first is not None:
+        bucketlist = Bucketlist.query.filter_by(title=title,
+                                      created_by=g.user.user_id).first()
+        if bucketlist:
             return {'message': 'the bucket list already exists'}, 400
+
         bucketlist = Bucketlist(title=title, description=description, created_by=g.user.user_id)
         save(bucketlist)
         return {'message': 'bucketlist created successfuly'}, 201
@@ -290,9 +296,9 @@ class BucketlistItemsAPI(Resource):
             return {'error': 'bucket list  not found'}, 404
 
         # check if item name exists in bucketlist
-        if BucketListItems.query.filter_by(item_name=item_name,
-                                           bucketlist_id=bucketlist_id).first() is not None:
-
+        bucketlist_items = BucketListItems.query.filter_by(item_name=item_name,
+                                           bucketlist_id=bucketlist_id).first()
+        if bucketlist_items:
             return {'error': 'item already exists in the bucketlist'}, 400
 
         bucketlist_item = BucketListItems(
