@@ -27,7 +27,7 @@ class RegisterAPI(Resource):
     Request method: POST
     """
 
-    def __init__(self):
+    def __init__(self):  # pragma: no cover
         """initializing parsers"""
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('username', type=str, required=True,
@@ -59,11 +59,11 @@ class RegisterAPI(Resource):
 
         # Allow matching of strings  with ilike to enable string to be case insensitive
         if User.query.filter(User.email.ilike(email)).first():
-            return {'message': 'email exists'}, 202
+            return {'message': 'email exists'}, 409
         if User.query.filter(User.username.ilike(username)).first() is not None:
             #  status code - request accepted but not processed
             return {
-                'message': 'username exists'}, 202
+                'message': 'username exists'}, 409
 
         user = User(username=username,email=email, password=password)
         user.hash_password(password)
@@ -76,7 +76,7 @@ class LoginAPI(Resource):
     User login URL: /api/v1/auth/login/
     Request method: POST
     """
-    def __init__(self):
+    def __init__(self):  # pragma: no cover
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('username', type=str, required=True,
                                    help='username cannot be blank')
@@ -139,8 +139,6 @@ class BucketlistsAPI(Resource):
         if title == "":
             # if empty bad request status
             return {'error': "Bucket list title cannot be empty"}, 400
-        # if Bucketlist.query.filter_by(title=title,
-        #                               created_by=g.user.user_id).first is not None:
         bucketlist = Bucketlist.query.filter_by(title=title,
                                       created_by=g.user.user_id).first()
         if bucketlist:
@@ -271,7 +269,7 @@ class BucketlistItemsAPI(Resource):
             return {'error': "bucket list not found."}, 404
         bucketlist_items = BucketListItems.query.filter_by(bucketlist_id=bucketlist_id).all()
         if not bucketlist_items:
-            return {'message': 'no items created yet'}, 202
+            return {'message': 'no items created yet'}, 404
 
         return {'items': marshal(bucketlist_items, bucketlist_items_fields)}
 

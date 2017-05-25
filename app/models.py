@@ -66,7 +66,7 @@ class Bucketlist(db.Model):
     user = db.relationship('User', backref="user")
     items = db.relationship('BucketListItems', backref='bucketlist')
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         """returning a printable representation for Bucketlist"""
         return "<Bucketlist: {}>".format(self.title)
 
@@ -85,7 +85,7 @@ class BucketListItems(db.Model):
                                                         ondelete='CASCADE'))
     is_done = db.Column(db.Boolean, default=False, nullable=False)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         """return printable representation for bucketlist item"""
         return '<Bucketlist Item {}>'.format(self.title)
 

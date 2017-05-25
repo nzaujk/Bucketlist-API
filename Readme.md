@@ -1,3 +1,5 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ffb700083f7c4eaa87879def9fb2b6b9)](https://www.codacy.com/app/nzaujk/Bucketlist-API?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nzaujk/Bucketlist-API&amp;utm_campaign=Badge_Grade)
+
 # Bucketlist API
 
 ## Description

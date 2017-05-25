@@ -1,6 +1,5 @@
 import json
 from tests.base import BaseTestCase
-from app.models import User
 
 
 class TestUser(BaseTestCase):
@@ -61,7 +60,7 @@ class TestUser(BaseTestCase):
         response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
                                     content_type='application/json')
         new_response_data = json.loads(response.get_data(as_text=True))
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 409)
         self.assertIn(new_response_data['message'], 'username exists')
 
     def test_new_user_cannot_register_with_existing_email(self):
@@ -70,7 +69,7 @@ class TestUser(BaseTestCase):
         response = self.client.post('/api/v1/auth/register', data=json.dumps(user),
                                     content_type='application/json')
         new_response_data = json.loads(response.get_data(as_text=True))
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 409)
         self.assertIn(new_response_data['message'], 'email exists')
 
     def test_user_login(self):

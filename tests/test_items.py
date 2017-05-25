@@ -31,6 +31,22 @@ class BucketlistItems(BaseTestCase):
                                            headers=self.get_header())
         self.assertEqual(response_item.status_code, 200)
 
+    def test_cannot_perform_delete_request_if_backet_list_does_not_exist(self):
+        """delete request fails for none existing bucketlist"""
+        response_item = self.client.delete('/api/v1/bucketlists/1/items/1',
+                                           headers=self.get_header())
+        self.assertEqual(response_item.status_code, 404)
+
+    def test_cannot_perform_delete_request_if_item_does_not_exist(self):
+        """delete request fails for none existing bucketlist"""
+        # add bucket list
+        data = {"title": "Travel Diaries", "description": "4 countries per year"}
+        self.client.post('/api/v1/bucketlists', data=data, headers=self.get_header())
+
+        response_item = self.client.delete('/api/v1/bucketlists/1/items/1',
+                                           headers=self.get_header())
+        self.assertEqual(response_item.status_code, 404)
+
     def test_lists_all_bucketlist_items(self):
         """Test that a user can view all bucketlists"""
         # add bucket list
@@ -39,7 +55,6 @@ class BucketlistItems(BaseTestCase):
                          headers=self.get_header())
         # add items to bucket list
         items = {'item_name': 'Mount Kenya Hike', 'is_done': False}
-                 # 'item_name': 'Semen Mountains', 'is_done': False}
         self.client.post('/api/v1/bucketlists/1/items', data=items,
                          headers=self.get_header())
         view_all = self.client.get('/api/v1/bucketlists/1/items/1', data=data,
@@ -69,8 +84,8 @@ class BucketlistItems(BaseTestCase):
                          headers=self.get_header())
         # view item in empty bucket list
         response = self.client.get('/api/v1/bucketlists/1/items',headers=self.get_header())
-        # status code 202 accepted but not processed
-        self.assertEqual(response.status_code, 202)
+
+        self.assertEqual(response.status_code, 404)
 
     def test_item_name_cannot_be_empty(self):
         """Test that an items name cannot be empty"""
