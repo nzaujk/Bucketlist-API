@@ -1,5 +1,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ffb700083f7c4eaa87879def9fb2b6b9)](https://www.codacy.com/app/nzaujk/Bucketlist-API?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nzaujk/Bucketlist-API&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/ffb700083f7c4eaa87879def9fb2b6b9)](https://www.codacy.com/app/nzaujk/Bucketlist-API?utm_source=github.com&utm_medium=referral&utm_content=nzaujk/Bucketlist-API&utm_campaign=Badge_Coverage)
+[![Packagist](https://img.shields.io/packagist/l/doctrine/orm.svg)]()
+[![PyPI](https://img.shields.io/pypi/pyversions/Django.svg)]()
 # Bucketlist API
 
 ## Description
