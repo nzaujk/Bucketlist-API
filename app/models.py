@@ -46,6 +46,7 @@ class User(db.Model):
         return user
 
     def __repr__(self):
+        """returning a printable version """
         return "<User: {}>" .format(self.username)
 
 

@@ -34,7 +34,7 @@ class TestUser(BaseTestCase):
         response_data = json.loads(response.get_data(as_text=True))
         self.assertIn(response_data['message'], 'email cannot be empty')
 
-    def test_registration_password__cannot_be_empty(self):
+    def test_registration_password_cannot_be_empty(self):
         """test registration password field cannot empty"""
         user = {"username": "miriam", 'email': 'meme@email.com', "password": ""}
         response = self.client.post('/api/v1/auth/register', data=json.dumps(user),

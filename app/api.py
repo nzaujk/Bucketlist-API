@@ -1,6 +1,5 @@
 from flask import g, request
 from flask_httpauth import HTTPTokenAuth
-
 from flask_restful import Resource, reqparse, marshal, fields
 from app import db
 
@@ -46,12 +45,14 @@ class RegisterAPI(Resource):
         password = args['password']
         # check if user already exists
 
+
         if username == "": # if user does not enter a user name
             return {'message': 'username cannot be empty'}, 400
         if password == "":
             return {'message': 'password cannot be empty'}, 400
         if email == "":
             return {'message': 'email cannot be empty'}, 400
+
 
         # Allow matching of strings  with ilike to enable string to be case insensitive
         if User.query.filter(User.email.ilike(email)).first():
@@ -169,14 +170,13 @@ class BucketlistsAPI(Resource):
 
                 response = {'bucketlists': marshal(bucketlists, bucketlist_fields),
                             'pages': total}
-                print(response)
                 return response
             else:
                 # not found status
                 return {'message': "Bucketlist not found"}, 404
 
         bucketlists = Bucketlist.query.filter_by(created_by=g.user.user_id).paginate(
-            page=page,per_page=limit,error_out=False)
+            page=page, per_page=limit,error_out=False)
         total = bucketlists.pages
         has_next = bucketlists.has_next
         has_previous = bucketlists.has_prev
@@ -196,7 +196,6 @@ class BucketlistsAPI(Resource):
         response = {'bucketlists': marshal(bucketlists, bucketlist_fields),
                     'pages': total,
                     "has_next": has_next,
-                    "total": total,
                     "previous_page": previous_page,
                     "next_page": next_page,
                     'url': "http://127.0.0.1:5000/api/v1/bucketlists?limit=20",
